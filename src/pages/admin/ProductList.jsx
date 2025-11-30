@@ -2,50 +2,52 @@
 import React, { useEffect, useState } from 'react';
 import { API_URL, authHeader } from '../../services/api';
 import { Link } from 'react-router-dom';
-import AdminLayout from '../../components/admin/AdminLayout';
 
 export default function ProductList(){
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const limit = 12;
   const [q, setQ] = useState('');
 
-  useEffect(()=> { fetchPage(); }, [page]);
-
-  async function fetchPage(){
-    const res = await fetch(`${API_URL}/products?page=${page}&limit=12&search=${encodeURIComponent(q)}`);
-    const data = await res.json();
-    setItems(data.items || []);
-    setTotal(data.total || 0);
+  async function fetchPage(p=1){
+    try {
+      const res = await fetch(`${API_URL}/products?page=${p}&limit=${limit}&search=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      const arr = Array.isArray(data) ? data : (data.items || []);
+      setItems(arr);
+      setTotal(data.total ?? arr.length);
+    } catch(err){ console.error(err); setItems([]); setTotal(0); }
   }
 
-  async function del(id){
+  useEffect(()=>{ fetchPage(page); }, [page, q]);
+
+  async function remove(id){
     if (!confirm('Delete product?')) return;
     await fetch(`${API_URL}/products/${id}`, { method: 'DELETE', headers: { ...authHeader() } });
-    fetchPage();
+    fetchPage(page);
   }
 
   return (
-    <AdminLayout>
+    <div>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold">Products</h2>
         <div className="flex gap-2">
           <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search..." className="border px-3 py-2 rounded" />
-          <button onClick={()=>{ setPage(1); fetchPage(); }} className="px-3 py-2 border rounded">Search</button>
           <Link to="/admin/new" className="px-4 py-2 bg-black text-white rounded">Add product</Link>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {items.map(p => (
-          <div key={p._id} className="bg-white rounded p-3 shadow">
-            <img src={(p.images && p.images[0]) || '/placeholder.png'} alt={p.title} className="h-40 w-full object-cover rounded" />
-            <h3 className="font-semibold mt-2">{p.title}</h3>
-            <div className="flex items-center justify-between mt-2">
+          <div key={p._id || p.id} className="bg-white p-4 rounded shadow">
+            <img src={(p.images && p.images[0]) || p.image || '/placeholder.png'} className="h-40 w-full object-cover mb-2" />
+            <h3 className="font-semibold">{p.title}</h3>
+            <div className="mt-2 flex justify-between">
               <div>₹ {p.price}</div>
               <div className="flex gap-2">
-                <Link to={`/admin/edit/${p._id}`} className="px-2 py-1 border rounded">Edit</Link>
-                <button onClick={()=>del(p._id)} className="px-2 py-1 border rounded">Delete</button>
+                <Link to={`/admin/edit/${p._id || p.id}`} className="px-2 py-1 border rounded">Edit</Link>
+                <button onClick={()=>remove(p._id || p.id)} className="px-2 py-1 border rounded">Delete</button>
               </div>
             </div>
           </div>
@@ -60,6 +62,6 @@ export default function ProductList(){
           <button onClick={()=>setPage(p=>p+1)} className="px-3 py-1 border rounded">Next</button>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }

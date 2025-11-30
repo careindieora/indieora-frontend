@@ -1,7 +1,6 @@
 // src/pages/Home.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import ProductCard from '../components/ProductCard';
-import { products as sampleProducts } from '../data/products'; // fallback
 import { API_URL } from '../services/api';
 
 export default function Home(){
@@ -11,45 +10,33 @@ export default function Home(){
   const [page, setPage] = useState(1);
   const perPage = 9;
 
-  useEffect(() => {
+  useEffect(()=>{
     let mounted = true;
-    // Try API first
-    fetch(`${API_URL}/products`)
+    fetch(`${API_URL}/products?page=1&limit=200`)
       .then(r => r.json())
       .then(data => {
-        if (!mounted) return;
-        // normalize: if API returned { items: [...] } use items, else if array use it
-        if (Array.isArray(data)) setProducts(data);
-        else if (data && Array.isArray(data.items)) setProducts(data.items);
-        else setProducts(sampleProducts); // fallback to local sample
-      })
-      .catch(err => {
+        const arr = Array.isArray(data) ? data : (data.items || []);
+        if(mounted) setProducts(arr);
+      }).catch(err => {
         console.error(err);
-        setProducts(sampleProducts);
       });
-    return () => { mounted = false; }
-  }, []);
+    return ()=> mounted = false;
+  },[]);
 
-  // categories from products
-  const categories = useMemo(() => {
-    const set = new Set(products.map(p => p.category).filter(Boolean));
-    return ['all', ...Array.from(set)];
-  }, [products]);
+  const categories = useMemo(()=>['all', ...Array.from(new Set(products.map(p=>p.category).filter(Boolean)))], [products]);
 
-  // filtered results
-  const filtered = useMemo(() => {
+  const filtered = useMemo(()=> {
     let arr = products || [];
-    if (category !== 'all') arr = arr.filter(p => p.category === category);
+    if (category !== 'all') arr = arr.filter(p=>p.category === category);
     if (q.trim()) {
       const qq = q.trim().toLowerCase();
-      arr = arr.filter(p => (p.title || p.name || '').toLowerCase().includes(qq)
-        || (p.description || '').toLowerCase().includes(qq));
+      arr = arr.filter(p => (p.title||'').toLowerCase().includes(qq) || (p.description||'').toLowerCase().includes(qq) || (p.tags||[]).some(t=>t.toLowerCase().includes(qq)));
     }
     return arr;
   }, [products, q, category]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-  useEffect(() => { if (page > totalPages) setPage(1); }, [totalPages]);
+  useEffect(()=> { if (page > totalPages) setPage(1); }, [totalPages]);
 
   const pageItems = filtered.slice((page-1)*perPage, page*perPage);
 
@@ -67,10 +54,7 @@ export default function Home(){
             {categories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
-
-        <div className="text-sm text-gray-600">
-          {filtered.length} result{filtered.length!==1?'s':''}
-        </div>
+        <div className="text-sm text-gray-600">{filtered.length} result{filtered.length!==1?'s':''}</div>
       </section>
 
       <section>
@@ -78,7 +62,6 @@ export default function Home(){
           {pageItems.map(p => <ProductCard key={p._id || p.id} product={p} />)}
         </div>
 
-        {/* Pagination */}
         <div className="mt-8 flex items-center justify-center space-x-2">
           <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1} className="px-3 py-1 border rounded">Prev</button>
           <div className="px-3 py-1 border rounded">Page {page} / {totalPages}</div>

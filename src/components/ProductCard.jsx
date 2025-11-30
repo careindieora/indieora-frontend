@@ -1,32 +1,21 @@
-import React from "react";
-import { Link } from "react-router-dom";
+// src/components/ProductCard.jsx
+import React from 'react';
 
 export default function ProductCard({ product }) {
+  const img = (product.images && product.images[0]) || product.image || product.img || '/placeholder.png';
   return (
-    <Link
-      to={`/product/${product.id || product._id}`}
-      className="group block bg-white rounded-xl shadow-sm hover:shadow-md transition p-4"
-    >
-      <div className="aspect-square w-full bg-gray-100 rounded-lg overflow-hidden">
-        <img
-          src={product.image || product.img}
-          alt={product.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition"
-        />
+    <article className="border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition bg-white">
+      <div className="w-full h-48 bg-gray-100">
+        <img src={img} alt={product.title} className="w-full h-48 object-cover" onError={(e)=>e.target.src='/placeholder.png'} />
       </div>
-
-      <h3 className="mt-3 font-semibold text-gray-900 text-lg line-clamp-1">
-        {product.title}
-      </h3>
-
-      <div className="mt-1 flex items-center justify-between">
-        <p className="text-gray-700 font-medium text-lg">
-          ₹ {product.price}
-        </p>
-        <button className="px-3 py-1 rounded-lg bg-black text-white text-sm">
-          Add
-        </button>
+      <div className="p-4">
+        <h3 className="font-semibold">{product.title}</h3>
+        <div className="mt-2 flex items-center justify-between">
+          <div className="text-lg font-bold">{product.currency || 'INR'} {product.price}</div>
+          <button className="px-3 py-1 text-sm rounded-full border">Add</button>
+        </div>
+        <div className="mt-2 text-sm text-gray-500">{product.category}</div>
       </div>
-    </Link>
-  );
+    </article>
+  )
 }

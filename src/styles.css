@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Optional normal CSS (allowed in v4) */
+body {
+  background-color: rgb(249 250 251); /* bg-gray-50 */
+  color: rgb(31 41 55); /* text-gray-800 */
+}

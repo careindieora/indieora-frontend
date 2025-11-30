@@ -9,7 +9,7 @@ import Shop from "./pages/Shop";
 import ProductDetail from "./pages/ProductDetail";
 
 // Admin pages
-import AdminLogin from './pages/admin/Login'
+import Login from '../../pages/admin/Login';
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminList from './pages/admin/List'         // optional: product list page
 import AdminSettings from './pages/admin/Settings';
@@ -31,7 +31,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="product/:id" element={<ProductDetail />} />
 
           {/* Admin login stays public (outside AdminLayout) */}
-          <Route path="admin/login" element={<AdminLogin />} />
+          <Route path="login" element={<Login />} />
         </Route>
 
         {/* Admin area (uses AdminLayout) */}

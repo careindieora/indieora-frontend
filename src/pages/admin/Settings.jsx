@@ -1,65 +1,88 @@
-// src/pages/admin/Settings.jsx
-import React, { useEffect, useState } from 'react';
-import { API_URL, authHeader } from '../../services/api';
+import React, { useEffect, useState } from "react";
+import { getSettings, updateSettings } from "../../services/settings";
+import { toast } from "react-hot-toast";
 
-export default function AdminSettings(){
-  const [form, setForm] = useState({ siteTitle: '', headerText: '', logoUrl: '' });
-  const [file, setFile] = useState(null);
-  const [loading, setLoading] = useState(false);
+export default function AdminSettings() {
+  const [form, setForm] = useState({
+    logo: "",
+    headerTitle: "",
+    headerSubtitle: "",
+    themeColor: "",
+  });
 
-  async function load(){
-    const res = await fetch(`${API_URL}/settings`);
-    const data = await res.json();
-    setForm({ siteTitle: data.siteTitle||'', headerText: data.headerText||'', logoUrl: data.logoUrl||'' });
-  }
+  useEffect(() => {
+    getSettings().then((res) => {
+      if (res) setForm(res);
+    });
+  }, []);
 
-  useEffect(()=>{ load(); }, []);
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  async function uploadImage(){
-    if(!file) return form.logoUrl;
-    const fd = new FormData(); fd.append('image', file);
-    const res = await fetch(`${API_URL}/upload`, { method:'POST', headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }, body: fd });
-    const j = await res.json(); return j.url;
-  }
-
-  async function save(e){
-    e.preventDefault();
-    try{
-      setLoading(true);
-      const logo = await uploadImage();
-      const payload = { ...form, logoUrl: logo };
-      const res = await fetch(`${API_URL}/settings`, { method:'PUT', headers:{ 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify(payload) });
-      if(!res.ok) throw new Error('Failed');
-      alert('Saved');
-      load();
-    }catch(err){ alert('Save failed'); console.error(err); } finally { setLoading(false); }
-  }
+  const saveSettings = async () => {
+    const ok = await updateSettings(form);
+    if (ok) toast.success("Settings saved!");
+  };
 
   return (
-    <div className="max-w-3xl">
-      <h2 className="text-2xl font-bold mb-4">Settings</h2>
-      <form onSubmit={save} className="bg-white p-6 rounded shadow space-y-3">
-        <div>
-          <label>Site title</label>
-          <input value={form.siteTitle} onChange={e=>setForm({...form, siteTitle: e.target.value})} className="w-full border p-2 rounded" />
-        </div>
-        <div>
-          <label>Header text</label>
-          <input value={form.headerText} onChange={e=>setForm({...form, headerText: e.target.value})} className="w-full border p-2 rounded" />
-        </div>
-        <div>
-          <label>Logo URL</label>
-          <input value={form.logoUrl} onChange={e=>setForm({...form, logoUrl: e.target.value})} className="w-full border p-2 rounded" />
-          <div className="mt-2">
-            <input type="file" onChange={e=>setFile(e.target.files[0])} />
-          </div>
-        </div>
+    <div className="p-6 space-y-8">
+      <h1 className="text-3xl font-semibold">Website Settings</h1>
 
-        <div className="flex gap-2">
-          <button className="px-4 py-2 bg-black text-white rounded">Save</button>
-          <button type="button" onClick={load} className="px-4 py-2 border rounded">Reload</button>
-        </div>
-      </form>
+      {/* Logo */}
+      <div>
+        <label className="font-medium">Logo URL</label>
+        <input
+          type="text"
+          name="logo"
+          value={form.logo}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+        />
+      </div>
+
+      {/* Header Title */}
+      <div>
+        <label className="font-medium">Header Title</label>
+        <input
+          type="text"
+          name="headerTitle"
+          value={form.headerTitle}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+        />
+      </div>
+
+      {/* Header Subtitle */}
+      <div>
+        <label className="font-medium">Header Subtitle</label>
+        <input
+          type="text"
+          name="headerSubtitle"
+          value={form.headerSubtitle}
+          onChange={handleChange}
+          className="border p-2 w-full rounded"
+        />
+      </div>
+
+      {/* Color */}
+      <div>
+        <label className="font-medium">Theme Color</label>
+        <input
+          type="color"
+          name="themeColor"
+          value={form.themeColor}
+          onChange={handleChange}
+          className="border p-2 rounded h-10 w-20"
+        />
+      </div>
+
+      <button
+        onClick={saveSettings}
+        className="bg-black text-white px-6 py-3 rounded hover:bg-gray-800"
+      >
+        Save Settings
+      </button>
     </div>
   );
 }

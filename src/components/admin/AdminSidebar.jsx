@@ -1,20 +1,25 @@
 // src/components/admin/AdminSidebar.jsx
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React from 'react';
+import { NavLink } from 'react-router-dom';
 
-export default function AdminSidebar() {
-  const linkClass = "block px-4 py-2.5 rounded-md text-gray-700 hover:bg-gray-100 transition";
-  const activeClass = "block px-4 py-2.5 rounded-md bg-black text-white transition";
+const linkBase = 'block px-4 py-2 rounded-md transition';
+const linkOff = `${linkBase} text-gray-700 hover:bg-clay-2`;
+const linkOn = `${linkBase} bg-clay-4 text-white shadow`;
 
+export default function AdminSidebar(){
   return (
-    <aside className="w-64 h-screen border-r bg-white p-4 hidden md:block sticky top-0">
-      <div className="mb-6 text-lg font-bold">Indieora Admin</div>
+    <aside className="hidden md:block w-64 bg-clay-1 border-r min-h-screen p-4">
+      <div className="mb-6">
+        <div className="text-2xl font-bold text-clay-4">Indieora Admin</div>
+        <div className="text-xs text-gray-600 mt-1">Manage products, categories & site</div>
+      </div>
+
       <nav className="space-y-1">
-        <NavLink to="/admin" end className={({isActive}) => isActive ? activeClass : linkClass}>📊 Dashboard</NavLink>
-        <NavLink to="/admin/products" className={({isActive}) => isActive ? activeClass : linkClass}>📦 Products</NavLink>
-        <NavLink to="/admin/new" className={({isActive}) => isActive ? activeClass : linkClass}>➕ Add Product</NavLink>
-        <NavLink to="/admin/categories" className={({isActive}) => isActive ? activeClass : linkClass}>🗂 Categories</NavLink>
-        <NavLink to="/admin/settings" className={({isActive}) => isActive ? activeClass : linkClass}>⚙️ Settings</NavLink>
+        <NavLink end to="/admin" className={({isActive}) => isActive ? linkOn : linkOff}>Dashboard</NavLink>
+        <NavLink to="/admin/products" className={({isActive}) => isActive ? linkOn : linkOff}>Products</NavLink>
+        <NavLink to="/admin/new" className={({isActive}) => isActive ? linkOn : linkOff}>Add Product</NavLink>
+        <NavLink to="/admin/categories" className={({isActive}) => isActive ? linkOn : linkOff}>Categories</NavLink>
+        <NavLink to="/admin/settings" className={({isActive}) => isActive ? linkOn : linkOff}>Settings</NavLink>
       </nav>
     </aside>
   );

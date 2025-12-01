@@ -7,6 +7,7 @@ import App from './App'
 import Home from './pages/Home'
 import Shop from './pages/Shop'
 import ProductDetail from './pages/ProductDetail'
+import { Toaster } from "react-hot-toast";
 
 // Admin pages (paths must be relative to src/)
 import Login from './pages/admin/Login'            // <-- fixed path
@@ -46,6 +47,7 @@ createRoot(document.getElementById('root')).render(
 
         {/* 404 route could go here */}
       </Routes>
+      <Toaster position="top-right" />
     </BrowserRouter>
   </React.StrictMode>
 )

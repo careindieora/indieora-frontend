@@ -1,72 +1,67 @@
 // src/pages/admin/Dashboard.jsx
-import React, { useEffect, useState } from "react";
-import { API_URL } from '../../services/api';
+import React, { useEffect, useState } from 'react';
+import axios from '../../services/axios.js';
 
-export default function AdminDashboard(){
-  const [stats, setStats] = useState({ totalProducts: 0, categories: 0 });
-  const [recent, setRecent] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function Dashboard(){
+  const [stats, setStats] = useState({ products:0, categories:0, orders:0 });
+  const [latest, setLatest] = useState([]);
 
   async function load(){
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/products?page=1&limit=6`);
-      const data = await res.json();
-      const items = Array.isArray(data) ? data : (data.items || []);
-      setRecent(items);
-      // total products: try data.total else length
-      const total = data.total ?? (Array.isArray(data) ? data.length : items.length);
-      // categories count: fetch categories
-      const catsRes = await fetch(`${API_URL}/categories`);
-      const cats = await catsRes.json();
-      setStats({ totalProducts: total, categories: Array.isArray(cats) ? cats.length : 0 });
-    } catch(err){
-      console.error(err);
-      setRecent([]);
-    } finally { setLoading(false); }
+    try{
+      const r = await axios.get('/admin/stats');
+      setStats(r.data.stats || { products:0, categories:0, orders:0 });
+      setLatest(r.data.latest || []);
+    }catch(e){
+      console.error(e);
+    }
   }
 
   useEffect(()=>{ load(); }, []);
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6">Dashboard Overview</h2>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
-          <div className="text-gray-500 text-sm">Total Products</div>
-          <div className="text-3xl font-bold mt-1">{loading ? '…' : stats.totalProducts}</div>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1 bg-white rounded-lg p-6 shadow" style={{background:'#fff'}}>
+          <div className="text-sm text-gray-500">Total products</div>
+          <div className="text-3xl font-bold text-clay-4">{stats.products}</div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
-          <div className="text-gray-500 text-sm">Categories</div>
-          <div className="text-3xl font-bold mt-1">{loading ? '…' : stats.categories}</div>
+        <div className="flex-1 bg-white rounded-lg p-6 shadow">
+          <div className="text-sm text-gray-500">Categories</div>
+          <div className="text-3xl font-bold text-clay-4">{stats.categories}</div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
-          <div className="text-gray-500 text-sm">Admin Status</div>
-          <div className="text-3xl font-bold mt-1 text-green-600">Active</div>
+        <div className="flex-1 bg-white rounded-lg p-6 shadow">
+          <div className="text-sm text-gray-500">Orders (placeholder)</div>
+          <div className="text-3xl font-bold text-clay-4">{stats.orders}</div>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow-sm border">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold">Recent Products</h3>
-        </div>
-        {recent.length===0 ? <div className="text-gray-500">No recent products</div> : (
-          <div className="space-y-4">
-            {recent.map(p => (
-              <div key={p._id || p.id} className="flex items-center justify-between border-b pb-3">
-                <div className="flex items-center gap-3">
-                  <img src={(p.images && p.images[0]) || p.image || '/placeholder.png'} className="h-16 w-16 object-cover rounded" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg p-6 shadow">
+          <h3 className="font-semibold mb-4">Latest Products</h3>
+          {latest.length===0 ? <div className="text-gray-500">No recent products</div> : (
+            <ul className="space-y-3">
+              {latest.map(p => (
+                <li key={p._id} className="flex items-center gap-4">
+                  <img src={(p.images && p.images[0]) || p.image || '/placeholder.png'} className="h-16 w-20 object-cover rounded" />
                   <div>
                     <div className="font-semibold">{p.title}</div>
                     <div className="text-sm text-gray-500">₹ {p.price}</div>
                   </div>
-                </div>
-                <a href={`/admin/edit/${p._id || p.id}`} className="px-3 py-1 border rounded-md">Edit</a>
-              </div>
-            ))}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="bg-white rounded-lg p-6 shadow">
+          <h3 className="font-semibold mb-4">Quick Actions</h3>
+          <div className="flex gap-2 flex-wrap">
+            <a href="/admin/new" className="px-4 py-2 rounded bg-clay-3 text-white">Add product</a>
+            <a href="/admin/products" className="px-4 py-2 rounded border">Manage products</a>
+            <a href="/admin/categories" className="px-4 py-2 rounded border">Manage categories</a>
           </div>
-        )}
+          <div className="mt-6 text-sm text-gray-500">Sales chart placeholder — integrate analytics when ready.</div>
+        </div>
       </div>
     </div>
   );

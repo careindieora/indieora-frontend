@@ -1,19 +1,12 @@
-import axios from "./axios.js";
+// src/services/settings.js
+import axios from './axios.js';
 
-export const getSettings = async () => {
-  try {
-    const res = await axios.get("/settings");
-    return res.data;
-  } catch {
-    return null;
-  }
-};
+export async function fetchSettings(){
+  const r = await axios.get('/settings');
+  return r.data;
+}
 
-export const updateSettings = async (data) => {
-  try {
-    await axios.put("/settings", data);
-    return true;
-  } catch {
-    return false;
-  }
-};
+export async function saveSettings(payload){
+  const r = await axios.put('/settings', payload);
+  return r.data;
+}

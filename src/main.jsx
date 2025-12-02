@@ -1,72 +1,60 @@
 // src/main.jsx
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import './styles.css'
-import App from './App'
-import Home from './pages/Home'
-import Shop from './pages/Shop'
-import ProductDetail from './pages/ProductDetail'
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import App from "./app.jsx";
+import Home from "./pages/Home.jsx";
+import Shop from "./pages/Shop.jsx";
+import ProductDetail from "./pages/ProductDetail.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Profile from "./pages/Profile.jsx";
+
+import AdminDashboard from "./pages/admin/Dashboard.jsx";
+import AdminSettings from "./pages/admin/Settings.jsx";
+import ProductList from "./pages/admin/ProductList.jsx";
+import ProductForm from "./pages/admin/ProductForm.jsx";
+import Categories from "./pages/admin/Categories.jsx";
+import AdminLayout from "./components/admin/AdminLayout.jsx";
+
+import { CartProvider } from "./context/CartContext.jsx";
 import { Toaster } from "react-hot-toast";
-import Login from './pages/Login.jsx';
-import Register from './pages/Register.jsx';
-import Profile from './pages/Profile.jsx';
 
-// Admin pages (paths must be relative to src/)
-// import Login from './pages/admin/Login'   // <-- fixed path
-import AdminDashboard from './pages/admin/Dashboard'
-import AdminList from './pages/admin/List'         // optional (remove if file doesn't exist)
-import AdminSettings from './pages/admin/Settings'
-import ProductList from './pages/admin/ProductList'
-import ProductForm from './pages/admin/ProductForm'
-import Categories from './pages/admin/Categories'
-import { CartProvider } from './context/CartContext.jsx';
+import "./styles.css";
 
-// Admin layout wrapper
-import AdminLayout from './components/admin/AdminLayout'
-
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <CartProvider>
-        <App />
+        <Routes>
+          {/* Public layout with App wrapper */}
+          <Route path="/" element={<App />}>
+            <Route index element={<Home />} />
+            <Route path="shop" element={<Shop />} />
+            <Route path="product/:id" element={<ProductDetail />} />
+
+            {/* Customer auth */}
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="profile" element={<Profile />} />
+          </Route>
+
+          {/* Admin area */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="products" element={<ProductList />} />
+            <Route path="products/new" element={<ProductForm />} />
+            <Route path="products/edit/:id" element={<ProductForm />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
+
+          {/* 404 could go here */}
+        </Routes>
+
+        <Toaster position="top-right" />
       </CartProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
-
-createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        {/* Public layout */}
-        <Route path="/" element={<App />}>
-          <Route index element={<Home />} />
-          <Route path="shop" element={<Shop />} />
-          <Route path="product/:id" element={<ProductDetail />} />
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register />} />
-            <Route path="profile" element={<Profile />} />
-
-
-          {/* Admin login stays public (outside AdminLayout) */}
-          <Route path="login" element={<Login />} />
-        </Route>
-
-        {/* Admin area (uses AdminLayout) */}
-        <Route path="/admin" element={<AdminLayout/>}>
-          <Route index element={<AdminDashboard/>} />
-          <Route path="products" element={<ProductList/>} />
-          <Route path="new" element={<ProductForm/>} />
-          <Route path="edit/:id" element={<ProductForm/>} />
-          <Route path="categories" element={<Categories/>} />
-          <Route path="settings" element={<AdminSettings/>} />
-          <Route path="list" element={<AdminList/>} />
-        </Route>
-
-        {/* 404 route could go here */}
-      </Routes>
-      <Toaster position="top-right" />
-    </BrowserRouter>
-  </React.StrictMode>
-)

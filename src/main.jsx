@@ -8,9 +8,12 @@ import Home from './pages/Home'
 import Shop from './pages/Shop'
 import ProductDetail from './pages/ProductDetail'
 import { Toaster } from "react-hot-toast";
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
+import Profile from './pages/Profile.jsx';
 
 // Admin pages (paths must be relative to src/)
-import Login from './pages/admin/Login'            // <-- fixed path
+// import Login from './pages/admin/Login'   // <-- fixed path
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminList from './pages/admin/List'         // optional (remove if file doesn't exist)
 import AdminSettings from './pages/admin/Settings'
@@ -41,6 +44,9 @@ createRoot(document.getElementById('root')).render(
           <Route index element={<Home />} />
           <Route path="shop" element={<Shop />} />
           <Route path="product/:id" element={<ProductDetail />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="profile" element={<Profile />} />
 
 
           {/* Admin login stays public (outside AdminLayout) */}

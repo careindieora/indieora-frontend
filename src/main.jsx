@@ -17,9 +17,20 @@ import AdminSettings from './pages/admin/Settings'
 import ProductList from './pages/admin/ProductList'
 import ProductForm from './pages/admin/ProductForm'
 import Categories from './pages/admin/Categories'
+import { CartProvider } from './context/CartContext.jsx';
 
 // Admin layout wrapper
 import AdminLayout from './components/admin/AdminLayout'
+
+createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <CartProvider>
+        <App />
+      </CartProvider>
+    </BrowserRouter>
+  </React.StrictMode>
+);
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -44,6 +55,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="edit/:id" element={<ProductForm/>} />
           <Route path="categories" element={<Categories/>} />
           <Route path="settings" element={<AdminSettings/>} />
+          <Route path="list" element={<AdminList/>} />
         </Route>
 
         {/* 404 route could go here */}

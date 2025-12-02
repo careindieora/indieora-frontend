@@ -1,53 +1,53 @@
-import React, { useState } from "react";
-import ProductCard from "../components/ProductCard";
-import { products } from "../data/products";
+// src/pages/Shop.jsx
+import React, { useEffect, useState } from 'react';
+import axios from '../services/axios.js';
+import ProductCard from '../components/ProductCard';
+import ProductFilters from '../components/ProductFilters';
+import Pagination from '../components/Pagination';
 
-export default function Shop() {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+export default function Shop(){
+  const [items, setItems] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [q, setQ] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = 12;
 
-  const filtered = products.filter((p) => {
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
-    const matchCategory = category === "all" || p.category === category;
-    return matchSearch && matchCategory;
-  });
+  async function loadCats(){
+    try { const r = await axios.get('/categories'); setCategories(r.data.items || []); } catch(e){ setCategories([]); }
+  }
+
+  async function loadProducts(pageNum = 1){
+    try {
+      const res = await axios.get(`/products?page=${pageNum}&limit=${limit}&search=${encodeURIComponent(q)}&category=${selectedCategory}`);
+      setItems(res.data.items || []);
+      setTotal(res.data.total || 0);
+    } catch (err) {
+      console.error('shop load', err);
+      setItems([]); setTotal(0);
+    }
+  }
+
+  useEffect(()=>{ loadCats(); }, []);
+  useEffect(()=>{ setPage(1); loadProducts(1); }, [q, selectedCategory]);
+  useEffect(()=>{ loadProducts(page); }, [page]);
 
   return (
-    <div className="space-y-8">
+    <div className="container mx-auto py-8 px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <aside className="lg:col-span-1">
+          <ProductFilters categories={categories} selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} q={q} setQ={setQ} />
+        </aside>
 
-      <h1 className="text-4xl font-bold">Shop</h1>
+        <section className="lg:col-span-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {items.map(p => <ProductCard key={p._id} product={p} />)}
+          </div>
 
-      {/* Search + Filters */}
-      <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-
-        {/* Search Bar */}
-        <input
-          type="text"
-          placeholder="Search products..."
-          onChange={(e) => setSearch(e.target.value)}
-          className="border rounded-lg px-4 py-2 w-full md:w-1/3"
-        />
-
-        {/* Category Filter */}
-        <select 
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="border rounded-lg px-4 py-2 w-full md:w-1/4"
-        >
-          <option value="all">All Products</option>
-          <option value="glass">Glass</option>
-          <option value="clay">Clay</option>
-          <option value="custom">Custom</option>
-        </select>
+          <Pagination page={page} setPage={setPage} total={total} limit={limit} />
+        </section>
       </div>
-
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filtered.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
-      </div>
-
     </div>
   );
 }

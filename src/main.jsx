@@ -31,6 +31,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="shop" element={<Shop />} />
           <Route path="product/:id" element={<ProductDetail />} />
 
+
           {/* Admin login stays public (outside AdminLayout) */}
           <Route path="login" element={<Login />} />
         </Route>

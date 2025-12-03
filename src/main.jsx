@@ -10,6 +10,7 @@ import ProductDetail from "./pages/ProductDetail.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Profile from "./pages/Profile.jsx";
+import AccountPage from "./pages/Account";
 
 import AdminDashboard from "./pages/admin/Dashboard.jsx";
 import AdminSettings from "./pages/admin/Settings.jsx";
@@ -38,6 +39,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="account" element={<AccountPage />} />
           </Route>
 
           {/* Admin area */}

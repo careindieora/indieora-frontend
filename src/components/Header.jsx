@@ -1,91 +1,143 @@
 // src/components/Header.jsx
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext.jsx';
-import CartDrawer from './CartDrawer.jsx';
-import { getUser, logout } from '../services/auth.js';
+import React, { useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useCart } from "../CartContext.jsx";
+import CartDrawer from "./CartDrawer.jsx";
+import { getUser, logout } from "../services/auth.js";
 
-export default function Header(){
-  const { items } = useCart();
-  const [drawerOpen, setDrawerOpen] = useState(false);
+export default function Header() {
+  const navigate = useNavigate();
+  const { items = [] } = useCart() || {}; // safe fallback
+  const [isCartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
   const user = getUser();
-  const nav = useNavigate();
+  const cartCount = Array.isArray(items)
+    ? items.reduce((sum, item) => sum + (item.quantity || 1), 0)
+    : 0;
 
-  const cartCount = items.reduce((s,i)=>s+Number(i.qty||0), 0);
+  const handleAccountClick = () => {
+    if (!user) {
+      navigate("/account");
+    } else {
+      setMenuOpen((v) => !v);
+    }
+  };
 
-  function handleLogout(){
+  const handleLogout = () => {
     logout();
-    nav('/');
-    // optionally refresh
-    window.location.reload();
-  }
+  };
 
   return (
     <>
-      <header className="bg-white shadow">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <img src="/logo192.png" alt="logo" className="h-10 w-10 object-contain" />
-            <div className="text-lg font-bold">Indieora</div>
+      <header className="border-b bg-white sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-amber-700 text-white flex items-center justify-center text-sm font-semibold">
+              I
+            </div>
+            <span className="font-semibold text-lg tracking-wide">
+              Indieora
+            </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/shop" className="text-gray-700 hover:text-gray-900">Shop</Link>
-            <Link to="/about" className="text-gray-700 hover:text-gray-900">About</Link>
-            <Link to="/contact" className="text-gray-700 hover:text-gray-900">Contact</Link>
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-8 text-sm">
+            <NavLink
+              to="/shop"
+              className={({ isActive }) =>
+                `hover:text-amber-800 ${
+                  isActive ? "text-amber-800 font-medium" : "text-gray-700"
+                }`
+              }
+            >
+              Shop
+            </NavLink>
+            <NavLink
+              to="/about"
+              className={({ isActive }) =>
+                `hover:text-amber-800 ${
+                  isActive ? "text-amber-800 font-medium" : "text-gray-700"
+                }`
+              }
+            >
+              About
+            </NavLink>
+            <NavLink
+              to="/contact"
+              className={({ isActive }) =>
+                `hover:text-amber-800 ${
+                  isActive ? "text-amber-800 font-medium" : "text-gray-700"
+                }`
+              }
+            >
+              Contact
+            </NavLink>
           </nav>
 
-          <div className="flex items-center gap-3">
-            {/* Cart button */}
+          {/* Right side icons */}
+          <div className="flex items-center gap-4">
+            {/* Cart */}
             <button
-              onClick={()=>setDrawerOpen(true)}
-              aria-label="Open cart"
-              className="relative p-2 rounded hover:bg-gray-50"
+              type="button"
+              onClick={() => setCartOpen(true)}
+              className="relative p-2 rounded-full border border-gray-200 hover:border-amber-700 hover:text-amber-800 transition"
             >
-              {/* cart icon */}
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 6m13-6l2 6m-9 0a1 1 0 11-2 0 1 1 0 012 0zm8 0a1 1 0 11-2 0 1 1 0 012 0z"/>
-              </svg>
-
+              <span className="material-icons text-base">shopping_cart</span>
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1.5">{cartCount}</span>
+                <span className="absolute -top-1 -right-1 bg-amber-700 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                  {cartCount}
+                </span>
               )}
             </button>
 
-            {/* Profile / Login button */}
+            {/* Account / Profile */}
             <div className="relative">
-              <button onClick={()=>setMenuOpen(s=>!s)} className="flex items-center gap-2 p-2 rounded hover:bg-gray-50">
-                {/* profile icon */}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A9 9 0 1119.88 6.196 9 9 0 015.12 17.804z" />
-                  <path strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="hidden sm:inline text-sm text-gray-700">{ user ? user.name || user.email : 'Account' }</span>
+              <button
+                type="button"
+                onClick={handleAccountClick}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 hover:border-amber-700 hover:text-amber-800 text-sm transition"
+              >
+                <span className="material-icons text-base">account_circle</span>
+                <span className="hidden sm:inline">
+                  {user ? user.name || "My account" : "Account"}
+                </span>
               </button>
 
-              {menuOpen && (
-                <div className="absolute right-0 mt-2 w-44 bg-white border rounded shadow z-50">
-                  {user ? (
-                    <div className="py-2">
-                      <Link to="/profile" onClick={()=>setMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50">Profile</Link>
-                      <Link to="/orders" onClick={()=>setMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50">Orders</Link>
-                      <button onClick={handleLogout} className="w-full text-left px-4 py-2 hover:bg-gray-50">Logout</button>
-                    </div>
-                  ) : (
-                    <div className="py-2">
-                      <Link to="/login" onClick={()=>setMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50">Login</Link>
-                      <Link to="/register" onClick={()=>setMenuOpen(false)} className="block px-4 py-2 hover:bg-gray-50">Register</Link>
-                    </div>
-                  )}
+              {/* Dropdown when logged in */}
+              {user && menuOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-2 text-sm">
+                  <button
+                    onClick={() => navigate("/account")}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-50"
+                  >
+                    Profile
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-50 text-red-600"
+                  >
+                    Logout
+                  </button>
                 </div>
               )}
             </div>
+
+            {/* Mobile menu button (optional) */}
+            <button
+              type="button"
+              onClick={() => navigate("/shop")}
+              className="md:hidden p-2 text-gray-700"
+            >
+              <span className="material-icons text-base">menu</span>
+            </button>
           </div>
         </div>
       </header>
 
-      {drawerOpen && <CartDrawer onClose={()=>setDrawerOpen(false)} />}
+      {/* Cart drawer component */}
+      <CartDrawer open={isCartOpen} onClose={() => setCartOpen(false)} />
     </>
   );
 }

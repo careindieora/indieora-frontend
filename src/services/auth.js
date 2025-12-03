@@ -1,31 +1,28 @@
 // src/services/auth.js
-import { api } from "./axios";
 
-// REGISTER (creates user + sends OTP)
-export async function registerRequest({ name, email, phone, password }) {
-  const res = await api.post("/auth/register", {
-    name,
-    email,
-    phone,
-    password,
-  });
-  return res.data; // { success, message, debugOtp? }
+// --- Get current logged-in user from localStorage ---
+export function getUser() {
+  try {
+    const stored = localStorage.getItem("indieora_user");
+    return stored ? JSON.parse(stored) : null;
+  } catch (err) {
+    console.error("Error parsing user:", err);
+    return null;
+  }
 }
 
-// RESEND OTP
-export async function resendOtpRequest(email) {
-  const res = await api.post("/auth/send-otp", { email });
-  return res.data;
-}
+// --- Logout helper: clear localStorage + redirect ---
+export function logout() {
+  try {
+    localStorage.removeItem("indieora_token");
+    localStorage.removeItem("token");
+    localStorage.removeItem("indieora_user");
+  } catch (e) {
+    // ignore
+  }
 
-// VERIFY OTP
-export async function verifyOtpRequest({ email, otp }) {
-  const res = await api.post("/auth/verify-otp", { email, otp });
-  return res.data; // { success, token, user }
-}
-
-// LOGIN
-export async function loginRequest({ email, password }) {
-  const res = await api.post("/auth/login", { email, password });
-  return res.data; // { token, user }
+  // Frontend account page
+  if (typeof window !== "undefined") {
+    window.location.href = "/account";
+  }
 }
